@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:video_compress/screens/compress_video.dart';
 import 'package:video_compress/utils/colors.dart';
+import 'package:video_player/video_player.dart';
 
 class UploadVideo extends StatefulWidget {
   const UploadVideo({Key? key}) : super(key: key);
@@ -10,6 +14,22 @@ class UploadVideo extends StatefulWidget {
 }
 
 class _UploadVideoState extends State<UploadVideo> {
+
+File? _video;
+final picker = ImagePicker();
+ VideoPlayerController? _videoPlayerController;
+
+
+// This funcion will helps you to pick a Video File
+_pickVideo() async {
+    PickedFile? pickedFile = await picker.getVideo(source: ImageSource.gallery);
+     _video = File(pickedFile!.path); 
+    _videoPlayerController = VideoPlayerController.file(_video!)..initialize().then((_) {
+      setState(() { });
+      _videoPlayerController!.play();
+    });
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,9 +92,15 @@ class _UploadVideoState extends State<UploadVideo> {
                           fontWeight: FontWeight.w600),
                     ),
                   ),
+                   if(_video != null) 
+                Image.file(_video!)
+            else
+                Text("Click on Pick Image to select an Image", style: TextStyle(fontSize: 18.0),),
                   GestureDetector(
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (Context)=>CompressVideo()));
+                      _pickVideo();
+
+                     // Navigator.push(context, MaterialPageRoute(builder: (Context)=>CompressVideo()));
                     },
                     child: Container(
                         width: 230,
@@ -89,11 +115,12 @@ class _UploadVideoState extends State<UploadVideo> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.file_upload,
-                                size: 30,
-                                color: Colors.white,
-                              ),
+                              Image.asset("assets/icons/cloud-computing.png",height: 30,width: 30,color: Colors.white,),
+                              // Icon(
+                              //   Icons.file_upload,
+                              //   size: 30,
+                              //   color: Colors.white,
+                              // ),
                               SizedBox(
                                 width: 10,
                               ),
@@ -121,11 +148,12 @@ class _UploadVideoState extends State<UploadVideo> {
                       fontSize: 20,
                       fontWeight: FontWeight.w500),
                 ),
-                Icon(
-                  Icons.all_inbox,
-                  color: Colors.white,
-                  size: 30,
-                )
+                Image.asset("assets/icons/grid.png",height: 30,width: 30,color: Colors.white,)
+                // Icon(
+                //   Icons.all_inbox,
+                //   color: Colors.white,
+                //   size: 30,
+                // )
               ],
             ),
             Expanded(
