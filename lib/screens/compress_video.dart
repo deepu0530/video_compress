@@ -1,16 +1,52 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:video_compress/screens/compressed.dart';
 import 'package:video_compress/screens/compression_type.dart';
 import 'package:video_compress/utils/colors.dart';
 import 'package:video_compress/widgets/button_widget.dart';
+import 'package:video_player/video_player.dart';
 
 class CompressVideo extends StatefulWidget {
-  const CompressVideo({Key? key}) : super(key: key);
+  CompressVideo(this.videoPath);
+
+  final String videoPath;
 
   @override
   _CompressVideoState createState() => _CompressVideoState();
 }
 
 class _CompressVideoState extends State<CompressVideo> {
+  String idx = "";
+
+  List<String> typesList = [
+    "Basic Compression",
+    "Strong Compression",
+    "Custom",
+  ];
+  List<String> descList = [
+    "Medium file size, high Quality",
+    "Smallest file size, best quality",
+    "Choose your own settings",
+  ];
+
+  VideoPlayerController? _videoPlayerController;
+
+  _initPlayer() {
+    final _video = File(widget.videoPath);
+    _videoPlayerController = VideoPlayerController.file(_video)
+      ..initialize().then((_) {
+        setState(() {});
+        _videoPlayerController!.play();
+      });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initPlayer();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +56,7 @@ class _CompressVideoState extends State<CompressVideo> {
         elevation: 0,
         toolbarHeight: 80,
         leading: GestureDetector(
-           onTap: (){
+          onTap: () {
             Navigator.pop(context);
           },
           child: Container(
@@ -58,14 +94,16 @@ class _CompressVideoState extends State<CompressVideo> {
                   height: 200,
                   width: 140,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      image: DecorationImage(
-                          image: AssetImage("assets/images/image.png"),
-                          fit: BoxFit.cover)),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: _videoPlayerController!.value.isInitialized
+                      ? VideoPlayer(_videoPlayerController!)
+                      : Container(),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 50,right: 50,top: 40,bottom: 80),
+                padding: const EdgeInsets.only(
+                    left: 50, right: 50, top: 40, bottom: 80),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -90,7 +128,7 @@ class _CompressVideoState extends State<CompressVideo> {
                         ),
                       ],
                     ),
-                     Column(
+                    Column(
                       children: [
                         Text(
                           "Expected Size",
@@ -114,117 +152,198 @@ class _CompressVideoState extends State<CompressVideo> {
                   ],
                 ),
               ),
+
               Container(
-              
-                padding: EdgeInsets.only(left: 10,right: 10),
-                child: Column(
-                  children: [
-                    Container(
-                        width: double.infinity,
-                      padding: EdgeInsets.only(left: 20,right: 20,top: 15,bottom: 15),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(width: 1,color: Colors.grey)
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                           Text(
-                             "Basic Compression",
-                             style: TextStyle(
-                                 color: Colors.white,
-                                 fontSize: 20,
-                                 fontWeight: FontWeight.w700),
-                           ),
-                           SizedBox(
-                             height: 10,
-                           ),
-                           Text(
-                             "Medium file size, best quality",
-                             style: TextStyle(
-                                 color: Colors.white.withOpacity(0.5),
-                                 fontSize: 16,
-                                 fontWeight: FontWeight.w400),
-                           )
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20,),
-                     Container(
-                        width: double.infinity,
-                      padding: EdgeInsets.only(left: 20,right: 20,top: 15,bottom: 15),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(width: 1,color: Colors.grey)
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                           Text(
-                             "Strong Compression",
-                             style: TextStyle(
-                                 color: Colors.white,
-                                 fontSize: 20,
-                                 fontWeight: FontWeight.w700),
-                           ),
-                           SizedBox(
-                             height: 10,
-                           ),
-                           Text(
-                             "Smallest file size, best quality",
-                             style: TextStyle(
-                                 color: Colors.white.withOpacity(0.5),
-                                 fontSize: 16,
-                                 fontWeight: FontWeight.w400),
-                           )
-                        ],
-                      ),
-                    ),
-                     SizedBox(height: 20,),
-                     Container(
-                        width: double.infinity,
-                      padding: EdgeInsets.only(left: 20,right: 20,top: 15,bottom: 15),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(width: 1,color: Colors.grey)
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                           Text(
-                             "Custom",
-                             style: TextStyle(
-                                 color: Colors.white,
-                                 fontSize: 20,
-                                 fontWeight: FontWeight.w700),
-                           ),
-                           SizedBox(
-                             height: 10,
-                           ),
-                           Text(
-                             "Choose Your Own Settings",
-                             style: TextStyle(
-                                 color: Colors.white.withOpacity(0.5),
-                                 fontSize: 16,
-                                 fontWeight: FontWeight.w400),
-                           )
-                        ],
-                      ),
-                    ),
-                  ],
+                child: ListView.separated(
+                  padding: EdgeInsets.only(left: 10, right: 10),
+                  itemCount: typesList.length,
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  separatorBuilder: (BuildContext context, int index) =>
+                      SizedBox(
+                    height: 15,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            idx = typesList[index];
+                          });
+                        },
+                        child: CompressionTypeListWidget(
+                          typename: typesList[index],
+                          desc: descList[index],
+                          boxposition: idx,
+                        ));
+                  },
                 ),
               ),
-               GestureDetector(
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (Context)=>CompressionType()));
-                    },
-                    child: Container(
-                        margin: EdgeInsets.only(top: 50, bottom: 50,left: 10,right: 10),
-                      child: ButtonWidget(buttonname: "Continue",))
-                  )
+              // Container(
+
+              //   padding: EdgeInsets.only(left: 10,right: 10),
+              //   child: Column(
+              //     children: [
+              //       CompressionTypeListWidget(),
+              //       SizedBox(height: 20,),
+              //        Container(
+              //           width: double.infinity,
+              //         padding: EdgeInsets.only(left: 20,right: 20,top: 15,bottom: 15),
+              //         decoration: BoxDecoration(
+              //           borderRadius: BorderRadius.circular(10),
+              //           border: Border.all(width: 1,color: Colors.grey)
+              //         ),
+              //         child: Column(
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: [
+              //              Text(
+              //                "Strong Compression",
+              //                style: TextStyle(
+              //                    color: Colors.white,
+              //                    fontSize: 20,
+              //                    fontWeight: FontWeight.w700),
+              //              ),
+              //              SizedBox(
+              //                height: 10,
+              //              ),
+              //              Text(
+              //                "Smallest file size, best quality",
+              //                style: TextStyle(
+              //                    color: Colors.white.withOpacity(0.5),
+              //                    fontSize: 16,
+              //                    fontWeight: FontWeight.w400),
+              //              )
+              //           ],
+              //         ),
+              //       ),
+              //        SizedBox(height: 20,),
+              //        Container(
+              //           width: double.infinity,
+              //         padding: EdgeInsets.only(left: 20,right: 20,top: 15,bottom: 15),
+              //         decoration: BoxDecoration(
+              //           borderRadius: BorderRadius.circular(10),
+              //           border: Border.all(width: 1,color: Colors.grey)
+              //         ),
+              //         child: Column(
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: [
+              //              Text(
+              //                "Custom",
+              //                style: TextStyle(
+              //                    color: Colors.white,
+              //                    fontSize: 20,
+              //                    fontWeight: FontWeight.w700),
+              //              ),
+              //              SizedBox(
+              //                height: 10,
+              //              ),
+              //              Text(
+              //                "Choose Your Own Settings",
+              //                style: TextStyle(
+              //                    color: Colors.white.withOpacity(0.5),
+              //                    fontSize: 16,
+              //                    fontWeight: FontWeight.w400),
+              //              )
+              //           ],
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (Context) => CompressionType()));
+                   
+                  },
+                  child: Container(
+                      margin: EdgeInsets.only(
+                          top: 50, bottom: 50, left: 10, right: 10),
+                      child: ButtonWidget(
+                        buttonname: "Continue",
+                      )))
             ],
           ),
         ),
+      ),
+    );
+  }
+ 
+}
+
+class CompressionTypeListWidget extends StatefulWidget {
+  const CompressionTypeListWidget(
+      {required this.typename, required this.desc, required this.boxposition});
+
+  final String typename;
+  final String desc;
+  final String boxposition;
+
+  @override
+  _CompressionTypeListWidgetState createState() =>
+      _CompressionTypeListWidgetState();
+}
+
+class _CompressionTypeListWidgetState extends State<CompressionTypeListWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 95,
+      width: double.infinity,
+      padding: EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
+      decoration: widget.boxposition== widget.typename
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: AppColors.appcolorwithop)
+          : BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(width: 1, color: Colors.grey)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.typename,
+                // "Basic Compression",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                widget.desc,
+                // "Medium file size, best quality",
+                style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400),
+              )
+            ],
+          ),
+          widget.boxposition == widget.typename
+              ? Container(
+                  height: 25,
+                  width: 25,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.appColor,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.check,
+                      size: 15,
+                      color: Colors.black,
+                    ),
+                  ),
+                )
+              : Container()
+        ],
       ),
     );
   }

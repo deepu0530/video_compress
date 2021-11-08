@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:video_compress/screens/compress_video.dart';
 import 'package:video_compress/screens/upload_video.dart';
 
 void main() {
@@ -18,7 +19,9 @@ class MyApp extends StatelessWidget {
        
         primarySwatch: Colors.blue,
       ),
-      home: UploadVideo(),
+      home: 
+      UploadVideo(),
+     // CompressVideo(),
     );
   }
 }
